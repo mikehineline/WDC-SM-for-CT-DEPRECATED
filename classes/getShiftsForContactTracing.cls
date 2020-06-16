@@ -9,9 +9,6 @@ global class getShiftsForContactTracing {
         
         @InvocableVariable
         global Date startDate;
-
-        @InvocableVariable
-        global Date endDate;
     }
     
     // Class for iterating over affected territories & days
