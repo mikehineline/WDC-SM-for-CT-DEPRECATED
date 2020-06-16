@@ -7,7 +7,7 @@ Salesforce Work.com offers several solutions, two of which are:
 
 This tool links the two. When employees worked a shift in the same location (Service Territory) on the same day, a contact tracer can choose to import those shifts and the co-workers in them as Contact Encounters and Contact Encounter Participants in Contact Tracing for Employees.
 
-# Installation
+## Installation
 1. Install the components in your Salesforce Work.com Org
 2. Navigate to a Contact Tracing record (Randall Pressey is a good choice)
 3. Click Setup > Edit Page
