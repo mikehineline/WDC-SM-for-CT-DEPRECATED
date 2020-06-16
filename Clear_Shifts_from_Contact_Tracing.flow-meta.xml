@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <description>Get Shifts from Shift Management for Contact Tracing</description>
+        <name>Get_Shifts</name>
+        <label>Get Shifts</label>
+        <locationX>815</locationX>
+        <locationY>60</locationY>
+        <actionName>getShiftsForContactTracing</actionName>
+        <actionType>apex</actionType>
+        <connector>
+            <targetReference>ConfirmationScreen</targetReference>
+        </connector>
+        <inputParameters>
+            <name>employeeNumber</name>
+            <value>
+                <elementReference>EmployeeNumber</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>startDate</name>
+            <value>
+                <elementReference>startDate</elementReference>
+            </value>
+        </inputParameters>
+    </actionCalls>
+    <assignments>
+        <description>Assign default variables</description>
+        <name>Assign_Variables</name>
+        <label>Assign Default Variables</label>
+        <locationX>180</locationX>
+        <locationY>60</locationY>
+        <assignmentItems>
+            <assignToReference>startDate</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Flow.CurrentDate</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Start_Date_Adjustment</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Set_EmployeeNumber</name>
+        <label>Set EmployeeNumber</label>
+        <locationX>665</locationX>
+        <locationY>60</locationY>
+        <assignmentItems>
+            <assignToReference>EmployeeNumber</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>getContactTracingRecord.HealthCloudGA__SourceSystemId__pc</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Get_Shifts</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <description>Set default start date backward in time.</description>
+        <name>Start_Date_Adjustment</name>
+        <label>Start Date Adjustment</label>
+        <locationX>305</locationX>
+        <locationY>60</locationY>
+        <assignmentItems>
+            <assignToReference>startDate</assignToReference>
+            <operator>Subtract</operator>
+            <value>
+                <numberValue>14.0</numberValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Get_Input_Parameters</targetReference>
+        </connector>
+    </assignments>
+    <description>Clear contact encounters (and child Contact Encounter Participants) for a given employee input from Contact Tracing.</description>
+    <interviewLabel>Clear Shifts from Contact Tracing {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Clear Shifts from Contact Tracing</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>Flow</processType>
+    <recordLookups>
+        <description>Get the Contact Tracing (PersonAccount) record from which this flow was launched.</description>
+        <name>getContactTracingRecord</name>
+        <label>Get Contact Tracing Record</label>
+        <locationX>538</locationX>
+        <locationY>60</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Set_EmployeeNumber</targetReference>
+        </connector>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>contactTraceRecordID</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Account</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <screens>
+        <name>ConfirmationScreen</name>
+        <label>Confirmation</label>
+        <locationX>934</locationX>
+        <locationY>60</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>CompletionConfirmation</name>
+            <fieldText>&lt;p&gt;Encounters have been created from shifts and all team members in those shifts have been added as encounter participants.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Please refresh the page to see the updated map.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Get_Input_Parameters</name>
+        <label>Get Input Parameters</label>
+        <locationX>422</locationX>
+        <locationY>60</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>true</allowPause>
+        <connector>
+            <targetReference>getContactTracingRecord</targetReference>
+        </connector>
+        <fields>
+            <name>FlowDescription</name>
+            <fieldText>&lt;p&gt;Use this tool to load team members who worked with this employee into the Contact Tracing map.  You can choose a start date below.  &lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Encounters will automatically be created for each shift and team members who worked those shifts with this employee will be added as participants in those encounters.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Start_Date</name>
+            <dataType>Date</dataType>
+            <defaultValue>
+                <elementReference>startDate</elementReference>
+            </defaultValue>
+            <fieldText>Start Date</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>&lt;p&gt;Choose the beginning date for which shifts should be collected.  Given a 2 week incubation period for COVID-19, it is recommended that you start 2 weeks back from today.&lt;/p&gt;</helpText>
+            <isRequired>false</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <start>
+        <locationX>50</locationX>
+        <locationY>60</locationY>
+        <connector>
+            <targetReference>Assign_Variables</targetReference>
+        </connector>
+    </start>
+    <status>Draft</status>
+    <variables>
+        <name>contactTraceRecordID</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>EmployeeID</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>EmployeeNames</name>
+        <dataType>String</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+    <variables>
+        <name>EmployeeNumber</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+    <variables>
+        <name>startDate</name>
+        <dataType>Date</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <value>
+            <dateValue>2020-06-01</dateValue>
+        </value>
+    </variables>
+</Flow>
