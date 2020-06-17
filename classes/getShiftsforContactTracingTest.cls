@@ -158,14 +158,16 @@ private class getShiftsforContactTracingTest {
         System.Debug('ar1.Id: '+ar1.Id);
 
         /**
-         * Test code
+         * Test getShiftsForContactTracing
          **/
 		Test.startTest();
         Date tStartDate = Date.newInstance(2020, 5, 1);
+        Date tEndDate = Date.newInstance(2020, 12, 1);
         List<getShiftsForContactTracing.employeesInputs> tInputs= new List<getShiftsForContactTracing.employeesInputs>();
         getShiftsForContactTracing.employeesInputs tInput = new getShiftsForContactTracing.employeesInputs();
         tInput.employeeNumber='EE-9999901';
         tInput.startDate=tStartDate;
+        tInput.endDate=tEndDate;
         tInputs.add(tInput);
 		getShiftsForContactTracing.getEmployees(tInputs);        
 
