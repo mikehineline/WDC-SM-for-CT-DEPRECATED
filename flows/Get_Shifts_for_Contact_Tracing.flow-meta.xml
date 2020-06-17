@@ -18,9 +18,15 @@
             </value>
         </inputParameters>
         <inputParameters>
+            <name>endDate</name>
+            <value>
+                <elementReference>End_Date</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
             <name>startDate</name>
             <value>
-                <elementReference>startDate</elementReference>
+                <elementReference>Start_Date</elementReference>
             </value>
         </inputParameters>
     </actionCalls>
@@ -37,6 +43,13 @@
                 <elementReference>$Flow.CurrentDate</elementReference>
             </value>
         </assignmentItems>
+        <assignmentItems>
+            <assignToReference>endDate</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Flow.CurrentDate</elementReference>
+            </value>
+        </assignmentItems>
         <connector>
             <targetReference>Start_Date_Adjustment</targetReference>
         </connector>
@@ -44,7 +57,7 @@
     <assignments>
         <name>Set_EmployeeNumber</name>
         <label>Set EmployeeNumber</label>
-        <locationX>665</locationX>
+        <locationX>678</locationX>
         <locationY>60</locationY>
         <assignmentItems>
             <assignToReference>EmployeeNumber</assignToReference>
@@ -132,15 +145,15 @@
         <label>Get Input Parameters</label>
         <locationX>422</locationX>
         <locationY>60</locationY>
-        <allowBack>true</allowBack>
+        <allowBack>false</allowBack>
         <allowFinish>true</allowFinish>
-        <allowPause>true</allowPause>
+        <allowPause>false</allowPause>
         <connector>
             <targetReference>getContactTracingRecord</targetReference>
         </connector>
         <fields>
             <name>FlowDescription</name>
-            <fieldText>&lt;p&gt;Use this tool to load team members who worked with this employee into the Contact Tracing map.  You can choose a start date below.  &lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Encounters will automatically be created for each shift and team members who worked those shifts with this employee will be added as participants in those encounters.&lt;/p&gt;</fieldText>
+            <fieldText>&lt;p&gt;Use this tool to load team members who worked with this employee into the Contact Tracing map.  You can choose a start date (default 2 weeks ago) and end date (default today) for  shifts.   &lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Encounters will automatically be created for each shift and team members who worked those shifts with this employee will be added as participants in those encounters.&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
         <fields>
@@ -152,6 +165,16 @@
             <fieldText>Start Date</fieldText>
             <fieldType>InputField</fieldType>
             <helpText>&lt;p&gt;Choose the beginning date for which shifts should be collected.  Given a 2 week incubation period for COVID-19, it is recommended that you start 2 weeks back from today.&lt;/p&gt;</helpText>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>End_Date</name>
+            <dataType>Date</dataType>
+            <defaultValue>
+                <elementReference>endDate</elementReference>
+            </defaultValue>
+            <fieldText>End Date</fieldText>
+            <fieldType>InputField</fieldType>
             <isRequired>false</isRequired>
         </fields>
         <showFooter>true</showFooter>
@@ -176,7 +199,7 @@
         <name>EmployeeID</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
-        <isInput>true</isInput>
+        <isInput>false</isInput>
         <isOutput>false</isOutput>
     </variables>
     <variables>
@@ -191,7 +214,18 @@
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
-        <isOutput>true</isOutput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>Latest date for which shifts will be pulled into contact tracing encounters.</description>
+        <name>endDate</name>
+        <dataType>Date</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <value>
+            <elementReference>$Flow.CurrentDate</elementReference>
+        </value>
     </variables>
     <variables>
         <name>startDate</name>
