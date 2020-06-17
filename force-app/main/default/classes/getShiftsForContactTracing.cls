@@ -3,7 +3,9 @@
  * 	for a given person account in contact tracing
  **/
 global class getShiftsForContactTracing {
-	// Class for input variables from flow
+    /**
+     * employeesInputs - Class for capturing input variables from the Flow
+     */
     global class employeesInputs {
         @InvocableVariable
         global String employeeNumber;
@@ -15,8 +17,10 @@ global class getShiftsForContactTracing {
         global Date endDate;
     }
     
-    // Class for iterating over affected territories & days
-    // Needed to find peers who worked the same shifts (AssignedResource) in the same areas (ServiceTerritories)
+    /**
+     * territoryClass - Class for storing key information when iterating over affected territories & days
+     * This information is then used to find peers who worked the same shifts (AssignedResource) in the same areas (ServiceTerritories)
+     */
     public class territoryClass {
         public Id arId; // AssignedResource Id
         public Id tId;  // ServiceTerritory Id
@@ -27,7 +31,12 @@ global class getShiftsForContactTracing {
     }
     
     /**
-     * Get a ContactEncounter Id from a list of Contact Encounters given a ContactEncounter.Name;
+     * getCEIDfromName - Get a ContactEncounter Id from a list of Contact Encounters given a ContactEncounter.Name
+     * Input:
+     *  encounteList - list of ContactEnter sObjects
+     *  encounterName - a ConatactEncounter.Name
+     * Output:
+     *  Id - ContactEncounter.Id for the Encounter with ContactEncounter.Name = encounterName
      **/
     public static Id getCEIdfromName(List<ContactEncounter> encounterList,String encounterName) {
         for (ContactEncounter ce : encounterList){
@@ -39,7 +48,12 @@ global class getShiftsForContactTracing {
     }
 
     /**
-     * Get Contact Id from Employee Number
+     * getCIdfromENum - Get Contact Id from Employee Number
+     * Input:
+     *  employeeList - list of Contact sObjects
+     *  employeeNumber - an employeeNumber used by Contact.HealthCloudGA__SourceSystemId__c
+     * Output:
+     *  Id - Contact.Id for the Contact with Contact.HealthCloudGA__SourceSystemId__c = employeeNumber
      **/
     public static Id getCIdfromENum(List<Contact> employeeList, String employeeNumber) {
         for (Contact c : employeeList){
@@ -50,6 +64,12 @@ global class getShiftsForContactTracing {
 		return null;
     }
 
+    /**
+     * getEmployees - invoked from a Flow to load shift information from Work.com Shift Management to contact encounters 
+     *  and participants for a given person account in contact tracing
+     * Input:
+     *  inputVars - see employeesInputs class definition
+     */
     @InvocableMethod(label='Get Shifts for Contact Tracing')
     global static void getEmployees(List<employeesInputs> inputVars) {
         String affectedEmployeeNumber = inputVars[0].employeeNumber;
@@ -75,7 +95,9 @@ global class getShiftsForContactTracing {
                                           WHERE ServiceResource.wkfsl__Employee__r.EmployeeNumber=:affectedEmployeeNumber AND ServiceAppointment.SchedStartTime > :startDateTime AND ServiceAppointment.SchedEndTime < :endDateTime 
             							  ORDER BY ServiceAppointment.ServiceTerritory.Name ASC, ServiceAppointment.SchedStartTime ASC]) {
             /**
-             *  Generate ContactEncounter and add it to the list
+             * Generate ContactEncounter for this shift and add it to the list
+             *  Each unique combination of a ServiceTerritory and Date will be considered a ContactEncounter
+             *  This represents an affected employee working in a given area on a given day 
              **/
             ContactEncounter ce = new ContactEncounter();
             ce.StartTime=ar.ServiceAppointment.SchedStartTime;
@@ -87,15 +109,15 @@ global class getShiftsForContactTracing {
 			}
             ce.Description = 'Encounter generated via Shift Management';
             // Calculate shift duration in minutes
-            // Will use the affected employee's shift as the EncounterDuration
-            // TO DO: A future option would be to actually calculate the shift overlap
+            // Use the affected employee's shift as the ContactEncounter.EncounterDuration
             // TO DO: Test if this works when a Service Appointment spans over a day transition
             // TO DO: Test for timezone impact
             long timeDiff = ((ar.ServiceAppointment.SchedEndTime.getTime())/1000/60) - ((ar.ServiceAppointment.SchedStartTime.getTime())/1000/60);
             ce.EncounterDuration = timeDiff.intValue();
 			newContactEncounters.add(ce);
 
-			// Store information from affected Assigned Resources that is needed to find peers
+            // Store key information from affected AssignedResources in a territoryClass list
+            //  This is the information needed to find peers who worked shifts at the same time as this employee
 			impactedTerritoryIds.add(ar.ServiceAppointment.ServiceTerritoryId);
 			territoryClass t = new territoryClass();
             t.arId = ar.Id;
@@ -119,6 +141,7 @@ global class getShiftsForContactTracing {
 
 		/**
 		 * Get a list of affected peer Employees so that we can bulk look up their Contact records
+         *  The Contact Ids are needed in the loop below.  This is to avoid individual SOQL statements within that loop.
 		 **/
         list<String> potentialPeerENums = new List<String>();
 		for (AssignedResource ar : [SELECT Id,ServiceResource.wkfsl__Employee__r.EmployeeNumber 
@@ -130,7 +153,7 @@ global class getShiftsForContactTracing {
         
 		/**
 		 *  Get all Employees sharing shifts in the same ServiceTerritories on the same Days
-		 *  TO DO: Prevent duplicates
+		 *  TO DO: Consider duplicate prevention when the same peer works multiple shifts with the affected employee
 		 **/
         List<ContactEncounterParticipant> newCEParticipants = new List<ContactEncounterParticipant>();
         // Loop through each ServiceTerritory
@@ -147,7 +170,7 @@ global class getShiftsForContactTracing {
                 String thisEncounterName = 'Shift: ' + ar.ServiceAppointment.ServiceTerritory.Name + ' on ' + thisDateString;
             	p.ContactEncounterId = getCEIdfromName(newContactEncounters,thisEncounterName); // TO DO: need to write Contact Encounters to DB so we have Ids
                 p.ContactId = getCIdfromENum(potentialPeers,ar.ServiceResource.wkfsl__Employee__r.EmployeeNumber); // TO DO: need to lookup Contact from EmployeeNumber
-                // TO DO: Determine why these fields are not writeable
+                // Note: StartTime and EncounterDuration are derived from the ContactEncounter and not writeable
                 //p.StartTime = ar.ServiceAppointment.SchedStartTime; // Start time for this peer employee
                 //p.EncounterDuration = t.ceDuration;
                 newCEParticipants.add(p);

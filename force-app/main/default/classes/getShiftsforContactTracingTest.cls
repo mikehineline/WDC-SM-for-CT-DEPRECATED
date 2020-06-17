@@ -1,3 +1,6 @@
+/**
+ * getShiftsForContactTracingTest - test class for getShiftsForContactTracingTest
+ **/
 @isTest
 private class getShiftsforContactTracingTest {
     @isTest
@@ -17,7 +20,7 @@ private class getShiftsforContactTracingTest {
 		} catch(DmlException e) {
     		System.debug('The following exception has occurred: ' + e.getMessage());
 		}
-        System.Debug('u1.Id: '+u1.Id);
+        //System.Debug('u1.Id: '+u1.Id);
 
         // Create test Locations
 		List<Schema.Location> tLo = new List<Schema.Location>();
@@ -34,7 +37,7 @@ private class getShiftsforContactTracingTest {
 		} catch(DmlException e) {
     		System.debug('The following exception has occurred: ' + e.getMessage());
 		}
-        System.Debug('lo1.Id: '+lo1.Id);
+        //System.Debug('lo1.Id: '+lo1.Id);
         
         // Create test Employees
 		List<Employee> tEmployees = new List<Employee>();
@@ -48,7 +51,7 @@ private class getShiftsforContactTracingTest {
 		} catch(DmlException e) {
     		System.debug('The following exception has occurred: ' + e.getMessage());
 		}
-        System.Debug('e1.Id: '+e1.Id);
+        //System.Debug('e1.Id: '+e1.Id);
         
         // Create test PersonAccounts
         RecordType paRT = [SELECT Id FROM RecordType WHERE Name = 'Person Account' and SObjectType = 'Account'];
@@ -62,7 +65,7 @@ private class getShiftsforContactTracingTest {
 		} catch(DmlException e) {
     		System.debug('The following exception has occurred: ' + e.getMessage());
 		}
-        System.Debug('p1.Id: '+p1.Id);
+        //System.Debug('p1.Id: '+p1.Id);
        
 		// Create Operating Hours (required field for Service Territory)
 		OperatingHours o1 = new OperatingHours(Name='OH Test',TimeZone='America/Los_Angeles');
@@ -79,7 +82,7 @@ private class getShiftsforContactTracingTest {
 		} catch(DmlException e) {
     		System.debug('The following exception has occurred: ' + e.getMessage());
 		}
-        System.Debug('st1.Id: '+st1.Id);
+        //System.Debug('st1.Id: '+st1.Id);
         
         // Create ServiceResources
 		List<ServiceResource> tSRs = new List<ServiceResource>();
@@ -92,7 +95,7 @@ private class getShiftsforContactTracingTest {
 		} catch(DmlException e) {
     		System.debug('The following exception has occurred: ' + e.getMessage());
 		}
-        System.Debug('sr1.Id: '+sr1.Id);
+        //System.Debug('sr1.Id: '+sr1.Id);
          
         // Create ServiceTerritoryMembers
 		List<ServiceTerritoryMember> tSTMs = new List<ServiceTerritoryMember>();
@@ -115,7 +118,7 @@ private class getShiftsforContactTracingTest {
 		} catch(DmlException e) {
     		System.debug('The following exception has occurred: ' + e.getMessage());
 		}
-        System.Debug('wdcAcc.Id: '+wdcAcc.Id);
+        //System.Debug('wdcAcc.Id: '+wdcAcc.Id);
 
         // Create Work.com Asset
 		Asset wdca = new Asset(Name='Work.com',AccountId=wdcAcc.Id);
@@ -124,7 +127,7 @@ private class getShiftsforContactTracingTest {
 		} catch(DmlException e) {
     		System.debug('The following exception has occurred: ' + e.getMessage());
 		}
-        System.Debug('wdca.Id: '+wdca.Id);
+        //System.Debug('wdca.Id: '+wdca.Id);
         
         // Create ServiceAppointments
 		List<ServiceAppointment> tSAs = new List<ServiceAppointment>();
