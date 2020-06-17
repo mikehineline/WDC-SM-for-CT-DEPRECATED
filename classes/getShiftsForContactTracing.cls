@@ -1,5 +1,6 @@
 /**
- * getShiftsForContactTracing
+ * getShiftsForContactTracing - copy shift information from Work.com Shift Management to contact encounters and participants
+ * 	for a given person account in contact tracing
  **/
 global class getShiftsForContactTracing {
 	// Class for input variables from flow
@@ -9,6 +10,9 @@ global class getShiftsForContactTracing {
         
         @InvocableVariable
         global Date startDate;
+
+        @InvocableVariable
+        global Date endDate;
     }
     
     // Class for iterating over affected territories & days
@@ -54,6 +58,9 @@ global class getShiftsForContactTracing {
         Time startTimeDay = Time.newInstance(0,0,0,0);
         Time endTimeDay = Time.newInstance(23,59,59,99);
         DateTime startDateTime = DateTime.newInstance(inputVars[0].startDate, startTimeDay);
+		// Set the endDateTime to the beginning of the day of the inputEndDateTime
+        // TO DO: adjust/test for timezones; currently using default GMT
+        DateTime endDateTime = DateTime.newInstance(inputVars[0].endDate, endTimeDay);
 
         /**
          * Get impacted shift info and generate list of ContactEncounters
@@ -65,7 +72,7 @@ global class getShiftsForContactTracing {
         List<territoryClass> impactedTerritories = new List<territoryClass>();
 		for (AssignedResource ar : [SELECT Id,ServiceAppointment.ServiceTerritoryId,ServiceAppointment.ServiceTerritory.Name,ServiceAppointment.ServiceTerritory.wkfsl__Location__c,ServiceAppointment.SchedStartTime,ServiceAppointment.SchedEndTime 
                                           FROM AssignedResource 
-                                          WHERE ServiceResource.wkfsl__Employee__r.EmployeeNumber=:affectedEmployeeNumber AND ServiceAppointment.SchedStartTime > :startDateTime 
+                                          WHERE ServiceResource.wkfsl__Employee__r.EmployeeNumber=:affectedEmployeeNumber AND ServiceAppointment.SchedStartTime > :startDateTime AND ServiceAppointment.SchedEndTime < :endDateTime 
             							  ORDER BY ServiceAppointment.ServiceTerritory.Name ASC, ServiceAppointment.SchedStartTime ASC]) {
             /**
              *  Generate ContactEncounter and add it to the list
@@ -116,7 +123,7 @@ global class getShiftsForContactTracing {
         list<String> potentialPeerENums = new List<String>();
 		for (AssignedResource ar : [SELECT Id,ServiceResource.wkfsl__Employee__r.EmployeeNumber 
                                     FROM AssignedResource 
-                                    WHERE ServiceAppointment.ServiceTerritoryId IN :impactedTerritoryIds AND ServiceAppointment.SchedStartTime > :startDateTime]) {
+                                    WHERE ServiceAppointment.ServiceTerritoryId IN :impactedTerritoryIds AND ServiceAppointment.SchedStartTime > :startDateTime AND ServiceAppointment.SchedEndTime < :endDateTime]) {
 			potentialPeerENums.add(ar.ServiceResource.wkfsl__Employee__r.EmployeeNumber);
         }
 		List<Contact> potentialPeers = [SELECT Id,HealthCloudGA__SourceSystemId__c FROM Contact WHERE HealthCloudGA__SourceSystemId__c IN :potentialPeerENums];
@@ -132,7 +139,7 @@ global class getShiftsForContactTracing {
             // For this ServiceTerritory get all AssignedResources on the same day the affected employee was assigned
             for (AssignedResource ar : [SELECT Id,ServiceAppointment.ServiceTerritory.Name,ServiceResource.wkfsl__Employee__r.EmployeeNumber,ServiceAppointment.SchedStartTime,ServiceAppointment.SchedEndTime 
                                         FROM AssignedResource 
-                                        WHERE ServiceAppointment.ServiceTerritoryId = :t.tId AND ServiceAppointment.SchedStartTime > :t.startDateTime AND ServiceAppointment.SchedStartTime < :t.endDateTime]) {
+                                        WHERE ServiceAppointment.ServiceTerritoryId = :t.tId AND ServiceAppointment.SchedStartTime > :t.startDateTime AND ServiceAppointment.SchedStartTime < :t.endDateTime AND ServiceAppointment.SchedEndTime < :endDateTime]) {
     			// Generate a list of ContactEncounterParticipants (affected Employees) 
                 // Create the new ContactEncounterParticipant and add it to the list
                 ContactEncounterParticipant p = new ContactEncounterParticipant();
@@ -156,7 +163,6 @@ global class getShiftsForContactTracing {
     		System.debug('The following exception has occurred: ' + e.getMessage());
 		}
 
-		// TO DO: DELETE
         // TEST
 //		  System.debug(impactedTerritories);
 //        System.debug(newContactEncounters);
