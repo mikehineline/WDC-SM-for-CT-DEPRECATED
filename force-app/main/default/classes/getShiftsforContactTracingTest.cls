@@ -144,7 +144,7 @@ private class getShiftsforContactTracingTest {
 		} catch(DmlException e) {
     		System.debug('The following exception has occurred: ' + e.getMessage());
 		}
-        System.Debug('sa1.Id: '+sa1.Id);
+        //System.Debug('sa1.Id: '+sa1.Id);
 
         // Create AssignedResources
 		List<AssignedResource> tARs = new List<AssignedResource>();
@@ -157,8 +157,8 @@ private class getShiftsforContactTracingTest {
 		} catch(DmlException e) {
     		System.debug('The following exception has occurred: ' + e.getMessage());
 		}
-        System.Debug(tARs);
-        System.Debug('ar1.Id: '+ar1.Id);
+        //System.Debug(tARs);
+        //System.Debug('ar1.Id: '+ar1.Id);
 
         /**
          * Test getShiftsForContactTracing
