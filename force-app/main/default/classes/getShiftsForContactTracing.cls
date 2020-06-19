@@ -168,8 +168,8 @@ global class getShiftsForContactTracing {
                 ContactEncounterParticipant p = new ContactEncounterParticipant();
             	thisDateString = ar.ServiceAppointment.SchedStartTime.date().format();
                 String thisEncounterName = 'Shift: ' + ar.ServiceAppointment.ServiceTerritory.Name + ' on ' + thisDateString;
-            	p.ContactEncounterId = getCEIdfromName(newContactEncounters,thisEncounterName); // TO DO: need to write Contact Encounters to DB so we have Ids
-                p.ContactId = getCIdfromENum(potentialPeers,ar.ServiceResource.wkfsl__Employee__r.EmployeeNumber); // TO DO: need to lookup Contact from EmployeeNumber
+                p.ContactEncounterId = getCEIdfromName(newContactEncounters,thisEncounterName);
+                p.ContactId = getCIdfromENum(potentialPeers,ar.ServiceResource.wkfsl__Employee__r.EmployeeNumber);
                 // Note: StartTime and EncounterDuration are derived from the ContactEncounter and not writeable
                 //p.StartTime = ar.ServiceAppointment.SchedStartTime; // Start time for this peer employee
                 //p.EncounterDuration = t.ceDuration;
