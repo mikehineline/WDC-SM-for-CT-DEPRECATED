@@ -1,4 +1,4 @@
-# WDC-SM-for-CT
+# WDC-SM-for-CT (DEPRECATED - Salesforce has EOL'd Work.com)
 Salesforce Work.com Shift Management for Contact Tracing
 
 Salesforce Work.com offers several solutions, two of which are:
